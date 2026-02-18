@@ -1,7 +1,8 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-
+from fastapi import Depends, HTTPException, status
+from models.user import User
 from db.sessions import SessionLocal
 from core.security import decode_access_token
 from services.user_service import UserService
@@ -49,3 +50,13 @@ def get_current_user(
         )
 
     return user
+
+def require_admin(
+    current_user: User = Depends(get_current_user),
+):
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+    return current_user
