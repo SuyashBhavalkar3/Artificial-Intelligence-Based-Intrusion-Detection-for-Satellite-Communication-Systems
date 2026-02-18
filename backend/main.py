@@ -7,3 +7,9 @@ app = FastAPI(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+
+from db.init_db import init_db
+
+@app.on_event("startup")
+def on_startup():
+    init_db()

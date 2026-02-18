@@ -2,8 +2,11 @@ fastapi
 uvicorn
 sqlalchemy
 psycopg2-binary
-python-jose
-passlib[bcrypt]
-python-dotenv
-pydantic
 aiosqlite
+python-jose
+passlib==1.7.4
+bcrypt==3.2.2
+python-dotenv
+pydantic-settings
+pydantic[email]
+python-multipart
