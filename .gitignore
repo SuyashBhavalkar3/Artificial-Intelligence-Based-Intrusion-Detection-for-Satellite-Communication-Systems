@@ -1,2 +1,10 @@
 satellite_env
 satellite_env/
+.vscode/
+__pycheck_cache__
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
