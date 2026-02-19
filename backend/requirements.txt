@@ -10,3 +10,6 @@ python-dotenv
 pydantic-settings
 pydantic[email]
 python-multipart
+scikit-learn
+numpy
+pytz
