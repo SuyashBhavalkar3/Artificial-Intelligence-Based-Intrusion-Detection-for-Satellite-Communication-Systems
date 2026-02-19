@@ -2,12 +2,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from api.deps import require_admin
-from   api.deps import get_db, get_current_user
-from   schema.threats import ThreatCreate, ThreatRead
-from   services.threat_service import ThreatService
-from   models.user import User
+from api.deps import get_db, get_current_user
+from schema.threats import ThreatCreate, ThreatRead
+from services.threat_service import ThreatService
+from models.user import User
 from schema.threats import ThreatStatusUpdate
 from api.deps import require_admin
+from services.audit_service import AuditService
 
 router = APIRouter(prefix="/threats", tags=["Threats"])
 
@@ -92,11 +93,21 @@ def update_threat_status(
     admin_user: User = Depends(require_admin)
 ):
     try:
-        return ThreatService.update_threat_status(
+        updated_threat = ThreatService.update_threat_status(
             db=db,
             threat_id=threat_id,
             new_status=status_in.status
         )
+
+        AuditService.log(
+            db=db,
+            user=admin_user,
+            action="UPDATE_THREAT_STATUS",
+            resource=f"threat:{threat_id}",
+            details=f"Status changed to {status_in.status}"
+        )
+        
+        return updated_threat
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
