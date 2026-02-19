@@ -14,18 +14,37 @@ class ThreatService:
         threat_in: ThreatCreate,
         reporter: User
     ) -> Threat:
-        # Ensure satellite belongs to the reporting user
-        satellite = (
-            db.query(Satellite)
-            .filter(
-                Satellite.id == threat_in.satellite_id,
-                Satellite.owner_id == reporter.id
+        # DEBUG: Log threat creation attempt
+        print(f"[THREAT_SERVICE] create_threat() called:")
+        print(f"  satellite_id={threat_in.satellite_id}, reporter.id={reporter.id}, reporter_type={type(reporter)}")
+        
+        # AI system user (id=999) bypasses ownership check; human reporters must own satellite
+        satellite = None
+        if reporter.id == 999:
+            # AI system: just verify satellite exists
+            satellite = db.query(Satellite).filter(
+                Satellite.id == threat_in.satellite_id
+            ).first()
+            if not satellite:
+                error_msg = f"Satellite not found (id={threat_in.satellite_id})"
+                print(f"[THREAT_SERVICE] {error_msg}")
+                raise ValueError(error_msg)
+        else:
+            # Human reporter: must own the satellite
+            satellite = (
+                db.query(Satellite)
+                .filter(
+                    Satellite.id == threat_in.satellite_id,
+                    Satellite.owner_id == reporter.id
+                )
+                .first()
             )
-            .first()
-        )
+            if not satellite:
+                error_msg = f"Satellite not found or access denied (id={threat_in.satellite_id}, owner_id should be {reporter.id})"
+                print(f"[THREAT_SERVICE] {error_msg}")
+                raise ValueError(error_msg)
 
-        if not satellite:
-            raise ValueError("Satellite not found or access denied")
+        print(f"[THREAT_SERVICE] Ownership query result: satellite={satellite}")
 
         threat = Threat(
             title=threat_in.title,

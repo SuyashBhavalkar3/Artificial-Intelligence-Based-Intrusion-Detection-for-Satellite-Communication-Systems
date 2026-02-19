@@ -1,3 +1,4 @@
+from db.import_all_models import *
 from fastapi import FastAPI
 from api.v1.api import api_router
 
