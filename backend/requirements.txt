@@ -13,3 +13,7 @@ python-multipart
 scikit-learn
 numpy
 pytz
+groq
+langchain
+langchain-groq
+python-dotenv
