@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     
-    # Reserved user ID for AI system (threat creation without human authorization)
     AI_SYSTEM_USER_ID: int = 999
 
     class Config:

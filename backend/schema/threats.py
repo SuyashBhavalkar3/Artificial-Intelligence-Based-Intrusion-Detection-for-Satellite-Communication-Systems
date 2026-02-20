@@ -20,6 +20,9 @@ class ThreatRead(ThreatBase):
     satellite_id: int
     reported_by_id: int
     created_at: datetime
+    
+    threat_score: float | None
+    ai_explanation: str | None
 
     @classmethod
     def from_orm(cls, obj):
@@ -28,7 +31,6 @@ class ThreatRead(ThreatBase):
 
     class Config:
         from_attributes = True
-
 
 class ThreatStatusUpdate(BaseModel):
     status: str
