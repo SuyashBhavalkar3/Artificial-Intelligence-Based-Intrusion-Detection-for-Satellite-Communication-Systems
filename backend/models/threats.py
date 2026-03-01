@@ -1,10 +1,12 @@
 from sqlalchemy import (
     Column,
+    Float,
     Integer,
     String,
     Text,
     DateTime,
-    ForeignKey
+    ForeignKey, 
+    Float
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -21,8 +23,11 @@ class Threat(Base):
     description = Column(Text, nullable=False)
 
     threat_type = Column(String(50), nullable=False)
-    severity = Column(String(20), nullable=False)  # LOW | MEDIUM | HIGH | CRITICAL
-    status = Column(String(20), default="DETECTED")  # DETECTED | MITIGATED | RESOLVED
+    severity = Column(String(20), nullable=False)
+    status = Column(String(20), default="DETECTED")
+
+    threat_score = Column(Float, nullable=True)
+    ai_explanation = Column(Text, nullable=True)
 
     satellite_id = Column(
         Integer,

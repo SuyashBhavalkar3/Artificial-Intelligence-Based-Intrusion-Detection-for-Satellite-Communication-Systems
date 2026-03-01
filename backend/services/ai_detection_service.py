@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import Dict
-
+from services.ai_explainability import generate_explanation
 from ai.feature_engineering import FeatureEngineer
 from ai.anomaly_model import AnomalyDetectionModel
 from models.telemetry import Telemetry
@@ -38,15 +38,14 @@ class AIDetectionService:
             return None
         
         print(f"[AI_SERVICE] Anomaly DETECTED! Proceeding to create threat...")
+
+        explanation = generate_explanation(features, threat_score=result.get("anomaly_score"))
         
         threat = ThreatService.create_threat(
             db=db,
             threat_in=ThreatCreate(
                 title="AI-Detected Intrusion",
-                description=(
-                    "Anomalous satellite communication detected "
-                    f"(score={result['anomaly_score']})"
-                ),
+                description=explanation, 
                 threat_type="AI_ANOMALY",
                 severity="HIGH",
                 satellite_id=telemetry.satellite_id
