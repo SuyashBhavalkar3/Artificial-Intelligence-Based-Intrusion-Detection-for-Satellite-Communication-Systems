@@ -3,3 +3,6 @@ satellite_env
 pycache/
 __pycache__/
 backend/pycache/
+.env/
+*.env
+backend/.env
