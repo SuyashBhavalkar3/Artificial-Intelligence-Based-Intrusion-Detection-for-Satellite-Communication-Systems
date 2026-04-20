@@ -33,7 +33,11 @@ def simulate_and_ingest(
     df = generate(n_samples=body.n_samples, attack_ratio=body.attack_ratio)
     results = {"total": len(df), "threats": 0, "by_type": {}}
     for _, row in df.iterrows():
-        threat = run_detection(row.to_dict(), db)
+        row_dict = {
+            k: (v.isoformat() if hasattr(v, "isoformat") else v)
+            for k, v in row.to_dict().items()
+        }
+        threat = run_detection(row_dict, db)
         t = threat.threat_type.value
         results["by_type"][t] = results["by_type"].get(t, 0) + 1
         if t != "normal":

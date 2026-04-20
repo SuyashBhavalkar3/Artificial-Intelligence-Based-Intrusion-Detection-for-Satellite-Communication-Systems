@@ -18,7 +18,7 @@ def run_detection(event_data: dict, db: Session) -> Threat:
         frequency=event_data.get("frequency", 0),
         signal_strength=event_data.get("signal_strength", 0),
         anomaly_score=result["anomaly_score"],
-        raw_features=json.dumps(event_data),
+        raw_features=json.dumps(event_data, default=str),
         timestamp=event_data.get("timestamp") or datetime.utcnow(),
     )
     db.add(event)
