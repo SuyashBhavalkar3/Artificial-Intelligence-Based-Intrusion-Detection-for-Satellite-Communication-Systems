@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { ThreatOut } from "@/lib/types";
 import Badge from "@/components/Badge";
+import BlockchainVerification from "@/components/threats/BlockchainVerification";
 
 const STATUSES = ["open", "investigating", "resolved"];
 
@@ -63,6 +64,10 @@ export default function ThreatDetailPage() {
           <div><span className="text-neutral-500">Status:</span> <Badge value={threat.status} /></div>
           <div><span className="text-neutral-500">Detected:</span> {new Date(threat.detected_at).toLocaleString()}</div>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <BlockchainVerification threatId={Number(id)} />
       </div>
 
       <div className="mb-5">

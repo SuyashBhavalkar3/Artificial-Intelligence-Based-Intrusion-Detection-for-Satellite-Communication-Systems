@@ -3,8 +3,9 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.tables import NetworkEvent, Threat, ThreatType, Severity, ThreatStatus
 from app.ml import inference, explainer
-from app.services import alerting
+from app.services import alerting, blockchain_service
 from app.websocket.manager import manager
+import hashlib
 
 def run_detection(event_data: dict, db: Session) -> Threat:
     result = inference.predict(event_data)
@@ -43,6 +44,31 @@ def run_detection(event_data: dict, db: Session) -> Threat:
     db.add(threat)
     db.commit()
     db.refresh(threat)
+
+    # Notarize on Blockchain
+    try:
+        # Simple integrity hash of the event
+        event_str = f"{event.src_ip}-{event.dst_ip}-{event.timestamp.isoformat()}"
+        event_hash = hashlib.sha256(event_str.encode()).hexdigest()
+
+        # Ensure contract is deployed (for demo purposes)
+        if not blockchain_service.blockchain_service.contract and blockchain_service.blockchain_service.is_connected():
+            blockchain_service.blockchain_service.compile_and_deploy()
+
+        receipt = blockchain_service.blockchain_service.record_threat(
+            threat.id,
+            threat.threat_type.value,
+            threat.severity.value,
+            int(threat.detected_at.timestamp()),
+            event_hash
+        )
+        if receipt:
+            threat.blockchain_tx_hash = receipt.transactionHash.hex()
+            threat.blockchain_block_number = receipt.blockNumber
+            db.commit()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Blockchain notarization failed: {e}")
 
     if result["is_threat"] and severity in (Severity.high, Severity.critical):
         alerting.dispatch_alert(threat, db)

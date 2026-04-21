@@ -64,6 +64,8 @@ class Threat(Base):
     shap_values = Column(Text, nullable=True)  # JSON string
     status = Column(SAEnum(ThreatStatus), default=ThreatStatus.open)
     detected_at = Column(DateTime, default=datetime.utcnow)
+    blockchain_tx_hash = Column(String, nullable=True)
+    blockchain_block_number = Column(Integer, nullable=True)
 
 class Alert(Base):
     __tablename__ = "alerts"

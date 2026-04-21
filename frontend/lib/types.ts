@@ -38,6 +38,8 @@ export interface ThreatOut {
   shap_values?: string;
   status: string;
   detected_at: string;
+  blockchain_tx_hash?: string;
+  blockchain_block_number?: number;
 }
 
 export interface AlertOut {

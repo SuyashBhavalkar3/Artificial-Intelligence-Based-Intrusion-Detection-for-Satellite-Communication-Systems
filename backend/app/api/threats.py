@@ -7,6 +7,8 @@ from app.database import get_db
 from app.models.tables import Threat, ThreatType, Severity, ThreatStatus
 from app.schemas.schemas import ThreatOut, ThreatStatusUpdate
 from app.auth.dependencies import get_current_user
+from app.services.blockchain_service import blockchain_service
+import hashlib
 
 router = APIRouter(prefix="/threats", tags=["threats"])
 
@@ -74,3 +76,47 @@ def update_status(
     threat.status = ThreatStatus(body.status)
     db.commit()
     return {"id": threat_id, "status": body.status}
+
+@router.get("/{threat_id}/blockchain")
+def verify_on_blockchain(threat_id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+    threat = db.query(Threat).filter(Threat.id == threat_id).first()
+    if not threat:
+        raise HTTPException(status_code=404, detail="Threat not found")
+    
+    # 1. Fetch data from blockchain
+    on_chain_data = blockchain_service.get_threat(threat_id)
+    if not on_chain_data or on_chain_data[0] == 0:
+        return {"status": "not_found", "message": "No record found on blockchain"}
+
+    # blockchain returns (id, type, severity, timestamp, eventHash)
+    bc_id, bc_type, bc_severity, bc_ts, bc_hash = on_chain_data
+
+    # 2. Local integrity check
+    from app.models.tables import NetworkEvent
+    event = db.query(NetworkEvent).filter(NetworkEvent.id == threat.event_id).first()
+    event_str = f"{event.src_ip}-{event.dst_ip}-{event.timestamp.isoformat()}"
+    local_hash = hashlib.sha256(event_str.encode()).hexdigest()
+
+    is_valid = (
+        bc_type == threat.threat_type.value and
+        bc_severity == threat.severity.value and
+        bc_hash == local_hash
+    )
+
+    return {
+        "status": "valid" if is_valid else "tampered",
+        "blockchain": {
+            "threat_id": bc_id,
+            "threat_type": bc_type,
+            "severity": bc_severity,
+            "timestamp": bc_ts,
+            "event_hash": bc_hash
+        },
+        "local": {
+            "threat_type": threat.threat_type.value,
+            "severity": threat.severity.value,
+            "event_hash": local_hash
+        },
+        "tx_hash": threat.blockchain_tx_hash,
+        "block_number": threat.blockchain_block_number
+    }
