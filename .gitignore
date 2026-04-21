@@ -6,3 +6,6 @@ backend/pycache/
 .env/
 *.env
 backend/.env
+backend/app/blockchain/deployment_info.json
+backend/satellite.db
+backend/app/blockchain/satellite.db
