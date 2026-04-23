@@ -35,7 +35,7 @@ export default function Navbar() {
           className="animate-pulse-ring"
           style={{
             width: 28, height: 28, borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--violet), var(--cyan))",
+            background: "var(--violet)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >

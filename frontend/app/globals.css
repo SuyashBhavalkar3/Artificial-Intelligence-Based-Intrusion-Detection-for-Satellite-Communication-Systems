@@ -126,7 +126,7 @@ body {
   position: absolute;
   bottom: -2px; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  background: var(--violet);
   border-radius: 2px;
 }
 
