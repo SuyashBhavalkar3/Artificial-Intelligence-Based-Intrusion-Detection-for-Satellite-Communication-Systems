@@ -11,6 +11,15 @@ def run_detection(event_data: dict, db: Session) -> Threat:
     result = inference.predict(event_data)
 
     # Persist network event
+    ts = event_data.get("timestamp")
+    if isinstance(ts, str):
+        try:
+            ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        except ValueError:
+            ts = datetime.utcnow()
+    elif ts is None:
+        ts = datetime.utcnow()
+
     event = NetworkEvent(
         src_ip=event_data.get("src_ip", ""),
         dst_ip=event_data.get("dst_ip", ""),
@@ -20,7 +29,7 @@ def run_detection(event_data: dict, db: Session) -> Threat:
         signal_strength=event_data.get("signal_strength", 0),
         anomaly_score=result["anomaly_score"],
         raw_features=json.dumps(event_data, default=str),
-        timestamp=event_data.get("timestamp") or datetime.utcnow(),
+        timestamp=ts,
     )
     db.add(event)
     db.flush()

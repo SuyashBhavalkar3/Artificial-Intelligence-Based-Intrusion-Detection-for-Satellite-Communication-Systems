@@ -27,8 +27,8 @@ class BlockchainService:
                 if self.contract_address and self.abi:
                     self.contract = self.w3.eth.contract(address=self.contract_address, abi=self.abi)
         
-        # Default Ganache Key #0
-        self.private_key = os.getenv("ETHEREUM_PRIVATE_KEY", "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d") 
+        # Default Ganache Key #0 (Updated to match current instance)
+        self.private_key = os.getenv("ETHEREUM_PRIVATE_KEY", "0x90991d30bfa202a7b0352ee59894ad6c81fa30804f4bdfe000a1805a9ff0cbea") 
         self.account = self.w3.eth.account.from_key(self.private_key)
 
     def is_connected(self):

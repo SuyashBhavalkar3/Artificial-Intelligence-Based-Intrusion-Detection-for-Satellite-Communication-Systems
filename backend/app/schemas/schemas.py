@@ -81,7 +81,11 @@ class ChatMessage(BaseModel):
     role: str
     content: str
 
-# --- Simulate ---
+# --- Simulation & Security ---
 class SimulateRequest(BaseModel):
-    n_samples: int = 100
+    n_samples: int = 10
     attack_ratio: float = 0.3
+
+class SecurePayload(BaseModel):
+    data: str  # Base64 encoded encrypted bundle
+    signature: str # ECC signature

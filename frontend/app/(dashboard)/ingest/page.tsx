@@ -16,9 +16,14 @@ export default function IngestPage() {
   const [form, setForm] = useState(defaultEvent);
   const [result, setResult] = useState<IngestResponse | null>(null);
   const [simResult, setSimResult] = useState<SimulateResponse | null>(null);
-  const [simForm, setSimForm] = useState({ n_samples: 100, attack_ratio: 0.3 });
+  const [simForm, setSimForm] = useState({ n_samples: 10, attack_ratio: 0.3 });
   const [loading, setLoading] = useState(false);
   const [simLoading, setSimLoading] = useState(false);
+  const [secureLoading, setSecureLoading] = useState(false);
+  const [secureResult, setSecureResult] = useState<{
+    flow: string[];
+    details: { encryption: string; signature: string; pqc_envelope: string };
+  } | null>(null);
   const [error, setError] = useState("");
 
   async function handleIngest(e: FormEvent) {
@@ -54,6 +59,19 @@ export default function IngestPage() {
       setError(err.message);
     } finally {
       setSimLoading(false);
+    }
+  }
+
+  async function handleSecureDemo() {
+    setError("");
+    setSecureLoading(true);
+    try {
+      const res = await api.post<any>("/api/ingest/demo-secure", {});
+      setSecureResult(res);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSecureLoading(false);
     }
   }
 
@@ -103,7 +121,44 @@ export default function IngestPage() {
       </div>
 
       <div>
-        <h1 className="text-lg font-semibold mb-4">Simulate (Admin)</h1>
+        <h1 className="text-lg font-semibold mb-4">Security Demonstration</h1>
+        <div className="bg-white border border-neutral-200 rounded p-5 space-y-4">
+          <p className="text-xs text-neutral-500 leading-relaxed">
+            Test the <strong>Hybrid Quantum-Resistant Layer</strong>. This simulates a satellite 
+            sending an encrypted and signed command that is verified by the ground station.
+          </p>
+          <button
+            onClick={handleSecureDemo}
+            disabled={secureLoading}
+            className="w-full bg-blue-600 text-white py-2 rounded text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {secureLoading ? "Verifying..." : "Run Secure Transmission Demo"}
+          </button>
+
+          {secureResult && (
+            <div className="mt-4 border-t pt-4 space-y-3">
+              <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+                <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                Secure Flow Verified
+              </div>
+              <ul className="space-y-1.5">
+                {secureResult.flow.map((step, i) => (
+                  <li key={i} className="text-[11px] text-neutral-600 flex gap-2">
+                    <span className="text-neutral-400 font-mono">{i + 1}.</span>
+                    {step}
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-neutral-50 rounded p-2 text-[10px] font-mono grid grid-cols-2 gap-2">
+                <div>Encryption: {secureResult.details.encryption}</div>
+                <div>Signature: {secureResult.details.signature}</div>
+                <div className="col-span-2">PQC: {secureResult.details.pqc_envelope}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <h1 className="text-lg font-semibold mt-8 mb-4">Simulate (Admin)</h1>
         <form onSubmit={handleSimulate} className="bg-white border border-neutral-200 rounded p-5 space-y-3">
           <div>
             <label className="block text-xs text-neutral-500 mb-1">Samples</label>
