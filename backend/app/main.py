@@ -14,6 +14,7 @@ from app.api.ingest import router as ingest_router
 from app.api.threats import router as threats_router
 from app.api.alerts import router as alerts_router
 from app.api.llm import router as llm_router
+from app.api.satellites import router as satellites_router
 
 logging.basicConfig(level=settings.LOG_LEVEL)
 logger = logging.getLogger(__name__)
@@ -69,6 +70,7 @@ app.include_router(ingest_router, prefix="/api")
 app.include_router(threats_router, prefix="/api")
 app.include_router(alerts_router, prefix="/api")
 app.include_router(llm_router, prefix="/api")
+app.include_router(satellites_router, prefix="/api")
 
 @app.get("/health")
 def health():

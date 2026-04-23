@@ -1,12 +1,12 @@
 const palette: Record<string, { bg: string; color: string; dot: string }> = {
-  critical: { bg: "#fef2f2", color: "#dc2626", dot: "#dc2626" },
-  high:     { bg: "#fff7ed", color: "#ea580c", dot: "#ea580c" },
-  medium:   { bg: "#fefce8", color: "#ca8a04", dot: "#ca8a04" },
-  low:      { bg: "#f0fdf4", color: "#16a34a", dot: "#16a34a" },
-  normal:   { bg: "#f0fdf4", color: "#16a34a", dot: "#16a34a" },
-  open:     { bg: "#fef2f2", color: "#dc2626", dot: "#dc2626" },
-  investigating: { bg: "#ede9fe", color: "#7c3aed", dot: "#7c3aed" },
-  resolved: { bg: "#f0fdf4", color: "#16a34a", dot: "#16a34a" },
+  critical: { bg: "rgba(255, 0, 60, 0.15)", color: "#ff003c", dot: "#ff003c" },
+  high:     { bg: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", dot: "#f59e0b" },
+  medium:   { bg: "rgba(250, 204, 21, 0.15)", color: "#facc15", dot: "#facc15" },
+  low:      { bg: "rgba(16, 185, 129, 0.15)", color: "#10b981", dot: "#10b981" },
+  normal:   { bg: "rgba(16, 185, 129, 0.15)", color: "#10b981", dot: "#10b981" },
+  open:     { bg: "rgba(255, 0, 60, 0.15)", color: "#ff003c", dot: "#ff003c" },
+  investigating: { bg: "rgba(139, 92, 246, 0.15)", color: "#8b5cf6", dot: "#8b5cf6" },
+  resolved: { bg: "rgba(16, 185, 129, 0.15)", color: "#10b981", dot: "#10b981" },
 };
 
 export default function Badge({ value }: { value: string }) {

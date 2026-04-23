@@ -22,6 +22,17 @@ interface VerificationData {
   message?: string;
 }
 
+const COLORS = {
+  primary: "#00f2ff",
+  bg: "#0b0e14",
+  bgCard: "#151921",
+  border: "#1e293b",
+  text: "#f8fafc",
+  muted: "#94a3b8",
+  success: "#10b981",
+  critical: "#ff003c",
+};
+
 export default function BlockchainVerification({ threatId }: { threatId: number }) {
   const [data, setData] = useState<VerificationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,21 +46,21 @@ export default function BlockchainVerification({ threatId }: { threatId: number 
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-neutral-500 py-4">
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 0", color: COLORS.muted, fontSize: 12 }}>
         <Loader2 className="w-4 h-4 animate-spin" />
-        Verifying integrity on Ethereum Ledger...
+        VERIFYING_IMMUTABLE_LEDGER...
       </div>
     );
   }
 
   if (!data || data.status === "not_found") {
     return (
-      <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 text-sm text-neutral-500">
-        <div className="flex items-center gap-2 mb-1">
+      <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 4, padding: 24, fontSize: 13, color: COLORS.muted }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, color: COLORS.text }}>
           <Database className="w-4 h-4" />
-          <span className="font-medium">No Blockchain Record</span>
+          <span style={{ fontWeight: 900, fontSize: 11, letterSpacing: "0.1em" }}>NO_BLOCKCHAIN_RECORD</span>
         </div>
-        <p className="text-xs">{data?.message || "This threat has not been notarized on the blockchain yet."}</p>
+        <p style={{ fontSize: 11 }}>{data?.message || "This threat has not been notarized on the blockchain yet."}</p>
       </div>
     );
   }
@@ -57,54 +68,66 @@ export default function BlockchainVerification({ threatId }: { threatId: number 
   const isValid = data.status === "valid";
 
   return (
-    <div className={`border rounded-lg overflow-hidden ${isValid ? "border-green-200 bg-green-50/30" : "border-red-200 bg-red-50/30"}`}>
-      <div className={`px-4 py-3 border-b flex items-center justify-between ${isValid ? "border-green-200" : "border-red-200"}`}>
-        <div className="flex items-center gap-2">
+    <div style={{ 
+      border: `1px solid ${isValid ? COLORS.success : COLORS.critical}40`, 
+      borderRadius: 4, overflow: "hidden", 
+      background: `${isValid ? COLORS.success : COLORS.critical}05` 
+    }}>
+      <div style={{ 
+        padding: "16px 24px", borderBottom: `1px solid ${isValid ? COLORS.success : COLORS.critical}40`, 
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: `${isValid ? COLORS.success : COLORS.critical}10`
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {isValid ? (
-            <ShieldCheck className="w-5 h-5 text-green-600" />
+            <ShieldCheck className="w-5 h-5" style={{ color: COLORS.success }} />
           ) : (
-            <ShieldAlert className="w-5 h-5 text-red-600" />
+            <ShieldAlert className="w-5 h-5" style={{ color: COLORS.critical }} />
           )}
-          <span className={`font-semibold ${isValid ? "text-green-900" : "text-red-900"}`}>
-            {isValid ? "Integrity Verified" : "TAMPER ALERT"}
+          <span style={{ fontWeight: 900, fontSize: 12, letterSpacing: "0.1em", color: isValid ? COLORS.success : COLORS.critical }}>
+            {isValid ? "LEDGER_INTEGRITY_VERIFIED" : "BLOCKCHAIN_TAMPER_ALERT"}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white/50 border border-neutral-200 text-[10px] font-mono text-neutral-600">
+        <div style={{ 
+          display: "flex", alignItems: "center", gap: 8, padding: "4px 10px", 
+          borderRadius: 4, background: "rgba(0,0,0,0.3)", border: `1px solid ${COLORS.border}`, 
+          fontSize: 10, fontFamily: "monospace", color: COLORS.primary 
+        }}>
           <LinkIcon className="w-3 h-3" />
-          {data.tx_hash?.slice(0, 10)}...
+          TX: {data.tx_hash?.slice(0, 12)}...
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Blockchain Record</h4>
-            <div className="space-y-1">
-              <RecordRow label="Type" value={data.blockchain?.threat_type} />
-              <RecordRow label="Severity" value={data.blockchain?.severity} />
+      <div style={{ padding: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
+          <div>
+            <h4 style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", color: COLORS.muted, marginBottom: 16, letterSpacing: "0.1em" }}>IMMUTABLE_LEDGER_RECORD</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <RecordRow label="THREAT_TYPE" value={data.blockchain?.threat_type} />
+              <RecordRow label="SEVERITY" value={data.blockchain?.severity} />
               <RecordRow 
-                label="Hash" 
-                value={data.blockchain?.event_hash.slice(0, 8) + "..."} 
+                label="EVENT_HASH" 
+                value={data.blockchain?.event_hash.slice(0, 12) + "..."} 
                 className="font-mono text-[10px]"
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Local Database</h4>
-            <div className="space-y-1">
+          <div>
+            <h4 style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", color: COLORS.muted, marginBottom: 16, letterSpacing: "0.1em" }}>LOCAL_DATABASE_IMAGE</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <RecordRow 
-                label="Type" 
+                label="THREAT_TYPE" 
                 value={data.local?.threat_type} 
                 isMatch={data.blockchain?.threat_type === data.local?.threat_type} 
               />
               <RecordRow 
-                label="Severity" 
+                label="SEVERITY" 
                 value={data.local?.severity} 
                 isMatch={data.blockchain?.severity === data.local?.severity} 
               />
               <RecordRow 
-                label="Hash" 
-                value={data.local?.event_hash.slice(0, 8) + "..."} 
+                label="EVENT_HASH" 
+                value={data.local?.event_hash.slice(0, 12) + "..."} 
                 className="font-mono text-[10px]"
                 isMatch={data.blockchain?.event_hash === data.local?.event_hash} 
               />
@@ -113,8 +136,12 @@ export default function BlockchainVerification({ threatId }: { threatId: number 
         </div>
 
         {!isValid && (
-          <div className="bg-red-100/50 border border-red-200 rounded p-2 text-[11px] text-red-700 leading-tight">
-            <strong>Warning:</strong> local data for this threat does not match the immutable record on Ethereum. This may indicate unauthorized log modification.
+          <div style={{ 
+            marginTop: 24, padding: 16, borderRadius: 4, 
+            background: "rgba(255, 0, 60, 0.1)", border: `1px solid ${COLORS.critical}40`,
+            fontSize: 11, color: COLORS.critical, lineHeight: 1.5 
+          }}>
+            <strong>CRITICAL_ALERT:</strong> Local asset record does not match the immutable ledger notarization. Potential unauthorized log modification detected in sector.
           </div>
         )}
       </div>
@@ -124,10 +151,14 @@ export default function BlockchainVerification({ threatId }: { threatId: number 
 
 function RecordRow({ label, value, isMatch, className = "" }: { label: string; value?: any; isMatch?: boolean; className?: string }) {
   return (
-    <div className="flex justify-between items-center text-xs">
-      <span className="text-neutral-500">{label}:</span>
-      <span className={`font-medium ${isMatch === false ? "text-red-600 underline decoration-wavy" : ""} ${className}`}>
-        {value || "N/A"}
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11 }}>
+      <span style={{ color: COLORS.muted }}>{label}:</span>
+      <span style={{ 
+        fontWeight: 800, color: isMatch === false ? COLORS.critical : COLORS.text,
+        textDecoration: isMatch === false ? "underline wavy" : "none",
+        fontFamily: className.includes("mono") ? "monospace" : "inherit"
+      }}>
+        {value?.toString().toUpperCase() || "N/A"}
       </span>
     </div>
   );

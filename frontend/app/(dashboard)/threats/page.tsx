@@ -46,40 +46,40 @@ export default function ThreatsPage() {
         </select>
       </div>
 
-      {error && <div className="text-sm text-red-600 mb-4">{error}</div>}
+      {error && <div className="text-sm text-red-400 mb-4">{error}</div>}
       {loading ? (
-        <div className="text-sm text-neutral-400">Loading...</div>
+        <div className="text-sm text-neutral-500">Scanning_Spectrum...</div>
       ) : (
-        <div className="bg-white border border-neutral-200 rounded overflow-hidden">
+        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
           <table className="w-full text-sm">
-            <thead className="bg-neutral-50 border-b border-neutral-200">
+            <thead style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border)" }}>
               <tr>
                 {["ID", "Type", "Severity", "Confidence", "Method", "Status", "Detected At"].map((h) => (
-                  <th key={h} className="text-left px-4 py-2 text-xs font-medium text-neutral-500">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ color: "var(--text)" }}>
               {threats.map((t) => (
-                <tr key={t.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                  <td className="px-4 py-2">
-                    <Link href={`/threats/${t.id}`} className="text-black underline underline-offset-2">{t.id}</Link>
+                <tr key={t.id} style={{ borderBottom: "1px solid var(--border)" }} className="hover:bg-white/5">
+                  <td className="px-4 py-3">
+                    <Link href={`/threats/${t.id}`} className="text-cyan-400 font-mono hover:underline">{t.id}</Link>
                   </td>
-                  <td className="px-4 py-2">{t.threat_type}</td>
-                  <td className="px-4 py-2"><Badge value={t.severity} /></td>
-                  <td className="px-4 py-2">{(t.confidence * 100).toFixed(1)}%</td>
-                  <td className="px-4 py-2">{t.detection_method}</td>
-                  <td className="px-4 py-2"><Badge value={t.status} /></td>
-                  <td className="px-4 py-2 text-neutral-500">{new Date(t.detected_at).toLocaleString()}</td>
+                  <td className="px-4 py-3 uppercase text-xs font-bold">{t.threat_type}</td>
+                  <td className="px-4 py-3"><Badge value={t.severity} /></td>
+                  <td className="px-4 py-3 font-mono">{(t.confidence * 100).toFixed(1)}%</td>
+                  <td className="px-4 py-3 text-neutral-400 text-xs">{t.detection_method}</td>
+                  <td className="px-4 py-3"><Badge value={t.status} /></td>
+                  <td className="px-4 py-3 text-neutral-500 font-mono text-xs">{new Date(t.detected_at).toLocaleString()}</td>
                 </tr>
               ))}
               {threats.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-6 text-center text-neutral-400">No threats found</td></tr>
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-neutral-500 italic">No threats identified in current sector</td></tr>
               )}
             </tbody>
           </table>
         </div>
-      )}
+      ) }
     </div>
   );
 }

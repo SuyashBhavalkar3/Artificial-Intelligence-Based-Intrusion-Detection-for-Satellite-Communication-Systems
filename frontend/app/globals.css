@@ -1,19 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #ffffff;
-  --bg-subtle: #f8f7ff;
-  --bg-card: #ffffff;
-  --border: #e8e4f8;
-  --border-strong: #c4b8f0;
-  --text: #1a1035;
-  --text-muted: #6b6b8a;
-  --violet: #7c3aed;
-  --violet-light: #ede9fe;
-  --violet-dark: #5b21b6;
-  --cyan: #06b6d4;
-  --cyan-light: #cffafe;
+  --bg: #0b0e14;
+  --bg-subtle: #06080c;
+  --bg-card: #151921;
+  --border: #1e293b;
+  --border-strong: #334155;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --violet: #8b5cf6;
+  --violet-light: #1e1b4b;
+  --violet-dark: #7c3aed;
+  --cyan: #00f2ff;
+  --cyan-light: #083344;
   --cyan-dark: #0891b2;
+  --accent: #00f2ff;
+  --critical: #ff003c;
+  --warning: #f59e0b;
+  --success: #10b981;
 }
 
 @theme inline {
@@ -34,6 +38,11 @@ body {
 }
 
 /* ── Animations ── */
+@keyframes scanline-move {
+  from { left: 40px; }
+  to   { left: 100%; }
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -45,9 +54,9 @@ body {
 }
 
 @keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.35); }
-  70%  { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.3); }
+  70%  { box-shadow: 0 0 0 10px rgba(0, 242, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
 }
 
 @keyframes shimmer {
@@ -91,10 +100,10 @@ body {
 
 /* Skeleton shimmer */
 .skeleton {
-  background: linear-gradient(90deg, #f0ecff 25%, #e4deff 50%, #f0ecff 75%);
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
   background-size: 400px 100%;
   animation: shimmer 1.4s infinite;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 /* Dot loader */
@@ -102,7 +111,7 @@ body {
   display: inline-block;
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--violet);
+  background: var(--cyan);
   animation: dot-bounce 1.2s infinite ease-in-out;
 }
 .dot-loader span:nth-child(2) { animation-delay: 0.2s; }
@@ -114,7 +123,7 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* Accent underline for active nav */
@@ -126,7 +135,7 @@ body {
   position: absolute;
   bottom: -2px; left: 0; right: 0;
   height: 2px;
-  background: var(--violet);
+  background: var(--cyan);
   border-radius: 2px;
 }
 

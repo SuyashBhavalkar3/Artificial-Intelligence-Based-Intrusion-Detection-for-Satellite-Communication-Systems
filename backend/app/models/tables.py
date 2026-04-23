@@ -85,3 +85,13 @@ class AuditLog(Base):
     resource = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
     ip_address = Column(String, nullable=True)
+
+class Satellite(Base):
+    __tablename__ = "satellites"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    norad_id = Column(String, unique=True)
+    status = Column(String, default="active")  # active / maintenance / decommissioned
+    encryption_key_status = Column(String, default="rotated")
+    last_contact = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)

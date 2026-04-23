@@ -43,39 +43,47 @@ export default function AlertsPage() {
         </label>
       </div>
 
-      {error && <div className="text-sm text-red-600 mb-4">{error}</div>}
+      {error && <div className="text-sm text-red-400 mb-4">{error}</div>}
       {loading ? (
-        <div className="text-sm text-neutral-400">Loading...</div>
+        <div className="text-sm text-neutral-500">Loading_Telemetry...</div>
       ) : (
-        <div className="bg-white border border-neutral-200 rounded overflow-hidden">
+        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
           <table className="w-full text-sm">
-            <thead className="bg-neutral-50 border-b border-neutral-200">
+            <thead style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border)" }}>
               <tr>
                 {["ID", "Threat", "Channel", "Message", "Sent At", "Status", "Action"].map((h) => (
-                  <th key={h} className="text-left px-4 py-2 text-xs font-medium text-neutral-500">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ color: "var(--text)" }}>
               {alerts.map((a) => (
-                <tr key={a.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                  <td className="px-4 py-2">{a.id}</td>
-                  <td className="px-4 py-2">{a.threat_id}</td>
-                  <td className="px-4 py-2">{a.channel}</td>
-                  <td className="px-4 py-2 max-w-xs truncate">{a.message}</td>
-                  <td className="px-4 py-2 text-neutral-500">{new Date(a.sent_at).toLocaleString()}</td>
-                  <td className="px-4 py-2">
-                    <span className={`text-xs font-medium ${a.acknowledged ? "text-neutral-400" : "text-black"}`}>
-                      {a.acknowledged ? "Acknowledged" : "Pending"}
+                <tr key={a.id} style={{ borderBottom: "1px solid var(--border)" }} className="hover:bg-white/5">
+                  <td className="px-4 py-3 font-mono">{a.id}</td>
+                  <td className="px-4 py-3 font-mono text-cyan-400">{a.threat_id}</td>
+                  <td className="px-4 py-3 uppercase text-xs font-bold text-neutral-400">{a.channel}</td>
+                  <td className="px-4 py-3 max-w-xs truncate">{a.message}</td>
+                  <td className="px-4 py-3 text-neutral-500 font-mono text-xs">{new Date(a.sent_at).toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    <span style={{ 
+                      fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
+                      background: a.acknowledged ? "var(--bg)" : "rgba(245, 158, 11, 0.1)",
+                      color: a.acknowledged ? "var(--text-muted)" : "#f59e0b"
+                    }}>
+                      {a.acknowledged ? "ACKNOWLEDGED" : "PENDING_ACTION"}
                     </span>
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3">
                     {!a.acknowledged && (
                       <button
                         onClick={() => acknowledge(a.id)}
-                        className="text-xs px-2 py-1 border border-neutral-300 rounded hover:bg-neutral-50"
+                        style={{
+                          fontSize: 10, fontWeight: 700, padding: "4px 10px",
+                          border: "1px solid var(--border-strong)", borderRadius: 4,
+                          background: "none", color: "var(--cyan)", cursor: "pointer"
+                        }}
                       >
-                        Acknowledge
+                        ACKNOWLEDGE
                       </button>
                     )}
                   </td>

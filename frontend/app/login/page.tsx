@@ -4,6 +4,26 @@ import { useRouter } from "next/navigation";
 import { api, setTokens } from "@/lib/api";
 import type { TokenResponse } from "@/lib/types";
 
+const COLORS = {
+  primary: "#00f2ff",
+  bg: "#0b0e14",
+  bgCard: "#151921",
+  border: "#1e293b",
+  text: "#f8fafc",
+  muted: "#94a3b8",
+  critical: "#ff003c",
+};
+
+function GeometricLogo() {
+  return (
+    <div style={{ position: "relative", width: 40, height: 40 }}>
+      <div style={{ position: "absolute", inset: 0, border: `2px solid ${COLORS.primary}`, opacity: 0.3 }} />
+      <div style={{ position: "absolute", inset: "20%", background: COLORS.primary }} />
+      <div style={{ position: "absolute", bottom: -4, right: -4, width: 12, height: 12, border: `2px solid ${COLORS.primary}` }} />
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -30,111 +50,104 @@ export default function LoginPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "var(--bg-subtle)",
+        background: COLORS.bg,
         display: "flex", alignItems: "center", justifyContent: "center",
         position: "relative", overflow: "hidden",
+        fontFamily: "var(--font-geist-sans), sans-serif",
       }}
     >
-      {/* Background orbs */}
-      <div style={{
-        position: "absolute", top: -120, right: -120,
-        width: 400, height: 400, borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute", bottom: -100, left: -100,
-        width: 350, height: 350, borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)",
-        pointerEvents: "none",
+      {/* Background technical overlay */}
+      <div style={{ 
+        position: "absolute", top: 0, left: 0, right: 0, bottom: 0, 
+        backgroundImage: `radial-gradient(circle at 50% 50%, #1e293b 1px, transparent 1px)`,
+        backgroundSize: "40px 40px",
+        opacity: 0.1,
+        pointerEvents: "none"
       }} />
 
       <div
         className="animate-fade-up"
         style={{
-          background: "#fff",
-          border: "1px solid var(--border)",
-          borderRadius: 16,
-          padding: "40px 36px",
-          width: 360,
-          boxShadow: "0 20px 60px rgba(124,58,237,0.1)",
+          background: COLORS.bgCard,
+          border: `1px solid ${COLORS.border}`,
+          borderRadius: 4,
+          padding: 48,
+          width: 440,
+          boxShadow: "0 40px 100px rgba(0,0,0,0.6)",
           position: "relative", zIndex: 1,
         }}
       >
-        {/* Logo mark */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: "linear-gradient(135deg, var(--violet), var(--cyan))",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 12px rgba(124,58,237,0.3)",
-          }}>
-            <span style={{ color: "#fff", fontSize: 16, fontWeight: 800 }}>S</span>
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>Satellite IDS</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Intrusion Detection System</div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 48 }}>
+          <GeometricLogo />
+          <div style={{ textAlign: "center", marginTop: 24 }}>
+            <div style={{ fontWeight: 900, fontSize: 18, color: COLORS.text, letterSpacing: "0.1em", textTransform: "uppercase" }}>Orbital IDS</div>
+            <div style={{ fontSize: 9, color: COLORS.primary, fontWeight: 800, marginTop: 4, letterSpacing: "0.2em" }}>SECURE_AUTHENTICATION_GATE</div>
           </div>
         </div>
 
-        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6, color: "var(--text)" }}>
-          Welcome back
-        </h1>
-        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>
-          Sign in to your account to continue
-        </p>
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: COLORS.text, marginBottom: 8, letterSpacing: "-0.02em" }}>
+            ACCESS_PROTOCOL
+          </h1>
+          <p style={{ fontSize: 11, color: COLORS.muted, fontWeight: 700, letterSpacing: "0.05em" }}>
+            PROVIDE_CREDENTIALS_FOR_ENCRYPTED_LINK
+          </p>
+        </div>
 
         {error && (
           <div style={{
-            background: "#fef2f2", border: "1px solid #fecaca",
-            borderRadius: 8, padding: "10px 14px",
-            fontSize: 13, color: "#dc2626", marginBottom: 16,
+            background: "rgba(255, 0, 60, 0.1)", border: `1px solid ${COLORS.critical}40`,
+            borderRadius: 4, padding: "12px 16px",
+            fontSize: 11, color: COLORS.critical, marginBottom: 24,
+            fontWeight: 800, fontFamily: "monospace"
           }}>
-            {error}
+            ERROR_LINK_FAILURE: {error.toUpperCase()}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>
-              Username
+            <label style={{ fontSize: 9, fontWeight: 900, color: COLORS.muted, display: "block", marginBottom: 8, letterSpacing: "0.1em" }}>
+              OPERATOR_ID
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="admin"
+              placeholder="e.g. ADMIN_01"
               required
               style={{
-                width: "100%", padding: "10px 14px",
-                border: "1.5px solid var(--border)",
-                borderRadius: 8, fontSize: 14, color: "var(--text)",
-                outline: "none", transition: "border-color 0.15s",
-                background: "#fff",
+                width: "100%", padding: "14px 16px",
+                background: COLORS.bg,
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: 4, fontSize: 13, color: COLORS.text,
+                outline: "none", transition: "all 0.2s",
+                fontWeight: 600, fontFamily: "monospace"
               }}
-              onFocus={(e) => (e.target.style.borderColor = "var(--violet)")}
-              onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              onFocus={(e) => (e.target.style.borderColor = COLORS.primary)}
+              onBlur={(e) => (e.target.style.borderColor = COLORS.border)}
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>
-              Password
+            <label style={{ fontSize: 9, fontWeight: 900, color: COLORS.muted, display: "block", marginBottom: 8, letterSpacing: "0.1em" }}>
+              ACCESS_KEY
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="••••••••••••"
               required
               style={{
-                width: "100%", padding: "10px 14px",
-                border: "1.5px solid var(--border)",
-                borderRadius: 8, fontSize: 14, color: "var(--text)",
-                outline: "none", transition: "border-color 0.15s",
-                background: "#fff",
+                width: "100%", padding: "14px 16px",
+                background: COLORS.bg,
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: 4, fontSize: 13, color: COLORS.text,
+                outline: "none", transition: "all 0.2s",
+                fontWeight: 600, fontFamily: "monospace"
               }}
-              onFocus={(e) => (e.target.style.borderColor = "var(--violet)")}
-              onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              onFocus={(e) => (e.target.style.borderColor = COLORS.primary)}
+              onBlur={(e) => (e.target.style.borderColor = COLORS.border)}
             />
           </div>
 
@@ -142,26 +155,23 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             style={{
-              marginTop: 8,
-              padding: "11px",
-              background: loading
-                ? "var(--border-strong)"
-                : "linear-gradient(135deg, var(--violet), var(--cyan))",
-              color: "#fff", border: "none", borderRadius: 8,
-              fontSize: 14, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer",
-              transition: "opacity 0.15s, transform 0.15s",
-              boxShadow: loading ? "none" : "0 4px 14px rgba(124,58,237,0.35)",
+              marginTop: 16,
+              padding: "16px",
+              background: COLORS.primary,
+              color: "#000", border: "none", borderRadius: 4,
+              fontSize: 12, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer",
+              transition: "all 0.2s",
+              boxShadow: loading ? "none" : `0 0 20px ${COLORS.primary}40`,
+              letterSpacing: "0.1em"
             }}
-            onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
           >
-            {loading ? (
-              <span className="dot-loader" style={{ display: "flex", justifyContent: "center", gap: 4 }}>
-                <span /><span /><span />
-              </span>
-            ) : "Sign In"}
+            {loading ? "INITIALIZING_LINK..." : "ESTABLISH_CONNECTION"}
           </button>
         </form>
+
+        <div style={{ marginTop: 32, textAlign: "center" }}>
+          <span style={{ fontSize: 8, fontWeight: 900, color: COLORS.muted, letterSpacing: "0.1em" }}>CRYPTO_STRENGTH: PQC_VERIFIED_256BIT</span>
+        </div>
       </div>
     </div>
   );

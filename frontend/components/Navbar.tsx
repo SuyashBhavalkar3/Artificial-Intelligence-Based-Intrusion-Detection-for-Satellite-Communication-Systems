@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clearTokens } from "@/lib/api";
@@ -8,12 +9,23 @@ const links = [
   { href: "/threats", label: "Threats", icon: "⚠" },
   { href: "/alerts", label: "Alerts", icon: "🔔" },
   { href: "/ingest", label: "Ingest", icon: "↑" },
+  { href: "/operator", label: "Operator", icon: "📡" },
   { href: "/chat", label: "AI Chat", icon: "✦" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`${window.location.origin.replace("3000", "8000")}/health`)
+        .then(r => setIsOnline(r.ok))
+        .catch(() => setIsOnline(false));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   function logout() {
     clearTokens();
@@ -23,9 +35,9 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        background: "#fff",
+        background: "var(--bg-card)",
         borderBottom: "1px solid var(--border)",
-        boxShadow: "0 1px 12px rgba(124,58,237,0.06)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
       }}
       className="px-6 py-0 flex items-center gap-1 sticky top-0 z-50"
     >
@@ -35,15 +47,24 @@ export default function Navbar() {
           className="animate-pulse-ring"
           style={{
             width: 28, height: 28, borderRadius: "50%",
-            background: "var(--violet)",
+            background: "var(--cyan)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}
         >
-          <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>S</span>
+          <span style={{ color: "#000", fontSize: 12, fontWeight: 700 }}>S</span>
         </div>
         <span style={{ fontWeight: 700, fontSize: 14, letterSpacing: "0.04em", color: "var(--text)" }}>
-          Satellite <span style={{ color: "var(--violet)" }}>IDS</span>
+          Satellite <span style={{ color: "var(--cyan)" }}>IDS</span>
         </span>
+        <div 
+          title={isOnline ? "System Online" : "System Offline"}
+          style={{ 
+            width: 8, height: 8, borderRadius: "50%", 
+            background: isOnline ? "#10b981" : "#ef4444",
+            marginLeft: 4,
+            boxShadow: isOnline ? "0 0 8px #10b981" : "none"
+          }} 
+        />
       </div>
 
       {/* Links */}
@@ -58,12 +79,12 @@ export default function Navbar() {
               display: "flex", alignItems: "center", gap: 6,
               padding: "18px 14px",
               fontSize: 13, fontWeight: active ? 600 : 400,
-              color: active ? "var(--violet)" : "var(--text-muted)",
+              color: active ? "var(--cyan)" : "var(--text-muted)",
               textDecoration: "none",
               transition: "color 0.15s",
               whiteSpace: "nowrap",
             }}
-            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = "var(--violet)"; }}
+            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = "var(--cyan)"; }}
             onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
           >
             <span style={{ fontSize: 11 }}>{l.icon}</span>
