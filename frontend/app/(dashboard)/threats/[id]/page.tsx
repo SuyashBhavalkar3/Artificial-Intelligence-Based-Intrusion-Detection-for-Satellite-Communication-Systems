@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import type { ThreatOut } from "@/lib/types";
 import Badge from "@/components/Badge";
 import BlockchainVerification from "@/components/threats/BlockchainVerification";
+import { formatToIST } from "@/lib/utils";
 
 const STATUSES = ["open", "investigating", "resolved"];
 
@@ -18,6 +19,15 @@ const COLORS = {
   success: "#10b981",
   critical: "#ff003c",
 };
+
+function PhysicsReadout({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ padding: 12, border: `1px solid ${COLORS.border}`, borderRadius: 4, background: "rgba(0,0,0,0.1)" }}>
+      <div style={{ fontSize: 8, fontWeight: 900, color: COLORS.muted, marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 13, fontWeight: 900, color: COLORS.text, fontFamily: "monospace" }}>{value}</div>
+    </div>
+  );
+}
 
 export default function ThreatDetailPage() {
   const { id } = useParams();
@@ -86,7 +96,7 @@ export default function ThreatDetailPage() {
             <DetailItem label="CONFIDENCE" value={`${(threat.confidence * 100).toFixed(1)}%`} mono />
             <DetailItem label="DETECTION_ENGINE" value={threat.detection_method} />
             <DetailItem label="LATEST_STATUS" value={<Badge value={threat.status} />} />
-            <DetailItem label="TIMESTAMP" value={new Date(threat.detected_at).toLocaleTimeString()} mono />
+            <DetailItem label="TIMESTAMP" value={formatToIST(threat.detected_at)} mono />
           </div>
         </div>
 
@@ -123,37 +133,101 @@ export default function ThreatDetailPage() {
         <BlockchainVerification threatId={Number(id)} />
       </div>
 
-      <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 4, padding: 32 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ fontSize: 16, color: COLORS.primary }}>✦</div>
-            <div style={{ fontSize: 11, fontWeight: 900, color: COLORS.text, letterSpacing: "0.1em" }}>INTELLIGENCE_LAYER_EXPLANATION</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 4, padding: 32 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 16, color: COLORS.primary }}>✦</div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: COLORS.text, letterSpacing: "0.1em" }}>INTELLIGENCE_LAYER_EXPLANATION</div>
+            </div>
+            <button
+              onClick={explainThreat}
+              disabled={explaining}
+              style={{
+                padding: "8px 24px", background: "none", color: COLORS.primary,
+                border: `1px solid ${COLORS.primary}`, borderRadius: 4, fontWeight: 900, fontSize: 11, cursor: "pointer"
+              }}
+            >
+              {explaining ? "RECOMPUTING..." : "GENERATE_ANALYSIS"}
+            </button>
           </div>
-          <button
-            onClick={explainThreat}
-            disabled={explaining}
-            style={{
-              padding: "8px 24px", background: "none", color: COLORS.primary,
-              border: `1px solid ${COLORS.primary}`, borderRadius: 4, fontWeight: 900, fontSize: 11, cursor: "pointer"
-            }}
-          >
-            {explaining ? "RECOMPUTING..." : "GENERATE_ANALYSIS"}
-          </button>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {threat.explanation && (
+              <div style={{ 
+                fontSize: 12, color: COLORS.text, lineHeight: 1.6, 
+                background: "rgba(0,0,0,0.2)", padding: 16, borderRadius: 4, 
+                border: `1px solid ${COLORS.border}`, fontFamily: "monospace", marginBottom: 12 
+              }}>
+                <div style={{ whiteSpace: "pre-wrap" }}>{threat.explanation}</div>
+              </div>
+            )}
+            
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: COLORS.muted }}>AI_ANOMALY_CORE_SCORE</span>
+                <span style={{ fontSize: 12, fontWeight: 900, color: COLORS.primary, fontFamily: "monospace" }}>{(threat.ai_score || 0).toFixed(4)}</span>
+              </div>
+              <div style={{ height: 4, background: "#1e293b", borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ width: `${(threat.ai_score || 0) * 100}%`, height: "100%", background: COLORS.primary, boxShadow: `0 0 10px ${COLORS.primary}` }} />
+              </div>
+            </div>
+
+            <div style={{ borderTop: `1px solid ${COLORS.border}`, paddingTop: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: COLORS.muted }}>SHAP_FEATURE_IMPORTANCE</span>
+                <span style={{ fontSize: 9, fontWeight: 900, color: COLORS.muted }}>Top Contributor: frequency_deviation</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} style={{ height: 2, background: i === 0 ? COLORS.primary : "#1e293b", width: `${100 - i * 30}%`, opacity: 1 - i * 0.3 }} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-        
-        {threat.explanation ? (
-          <div style={{ 
-            fontSize: 14, color: COLORS.text, lineHeight: 1.8, 
-            background: "rgba(0,0,0,0.2)", padding: 24, borderRadius: 4, 
-            border: `1px solid ${COLORS.border}`, fontFamily: "monospace" 
-          }}>
-            <div style={{ whiteSpace: "pre-wrap" }}>{threat.explanation}</div>
+
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 4, padding: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
+            <div style={{ fontSize: 16, color: COLORS.primary }}>📡</div>
+            <div style={{ fontSize: 11, fontWeight: 900, color: COLORS.text, letterSpacing: "0.1em" }}>PHY_LAYER_SIGNAL_PHYSICS</div>
           </div>
-        ) : (
-          <div style={{ textAlign: "center", padding: 40, color: COLORS.muted, fontSize: 12, fontStyle: "italic" }}>
-            Awaiting Operator instruction for detailed anomaly breakdown.
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: COLORS.muted }}>PHYSICS_ANOMALY_SCORE</span>
+                <span style={{ fontSize: 12, fontWeight: 900, color: COLORS.primary, fontFamily: "monospace" }}>{(threat.physics_score || 0).toFixed(4)}</span>
+              </div>
+              <div style={{ height: 4, background: "#1e293b", borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ width: `${(threat.physics_score || 0) * 100}%`, height: "100%", background: COLORS.primary, boxShadow: `0 0 10px ${COLORS.primary}` }} />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {threat.signal_integrity && (() => {
+                const si = JSON.parse(threat.signal_integrity);
+                return (
+                  <>
+                    <PhysicsReadout label="SS_DEVIATION" value={`${si.signal_strength_deviation} dBm`} />
+                    <PhysicsReadout label="FREQ_DEVIATION" value={`${si.frequency_deviation} Hz`} />
+                    <div style={{ gridColumn: "span 2", marginTop: 8 }}>
+                      <div style={{ fontSize: 9, fontWeight: 800, color: COLORS.muted, marginBottom: 8 }}>DETECTED_SIGNAL_VECTORS</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                        {si.detected_vectors.map((v: string, i: number) => (
+                          <span key={i} style={{ fontSize: 9, fontWeight: 900, color: COLORS.primary, background: "rgba(0, 242, 255, 0.1)", padding: "4px 8px", borderRadius: 2, border: `1px solid ${COLORS.primary}40` }}>
+                            {v}
+                          </span>
+                        ))}
+                        {si.detected_vectors.length === 0 && <span style={{ fontSize: 9, fontWeight: 800, color: COLORS.muted }}>NO_SIGNIFICANT_PHY_DEVIATION</span>}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

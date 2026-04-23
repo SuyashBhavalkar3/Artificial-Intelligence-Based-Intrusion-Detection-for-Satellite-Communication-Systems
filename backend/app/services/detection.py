@@ -1,14 +1,16 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.tables import NetworkEvent, Threat, ThreatType, Severity, ThreatStatus
 from app.ml import inference, explainer
-from app.services import alerting, blockchain_service
+from app.services import alerting, blockchain_service, anomaly_analysis
 from app.websocket.manager import manager
 import hashlib
 
 def run_detection(event_data: dict, db: Session) -> Threat:
     result = inference.predict(event_data)
+    # Physics-Based core analysis (Signal Strength & Frequency)
+    physics_res = anomaly_analysis.anomaly_analyzer.analyze_signal_anomalies(event_data)
 
     # Persist network event
     ts = event_data.get("timestamp")
@@ -16,9 +18,9 @@ def run_detection(event_data: dict, db: Session) -> Threat:
         try:
             ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
         except ValueError:
-            ts = datetime.utcnow()
+            ts = datetime.now(timezone.utc)
     elif ts is None:
-        ts = datetime.utcnow()
+        ts = datetime.now(timezone.utc)
 
     event = NetworkEvent(
         src_ip=event_data.get("src_ip", ""),
@@ -46,7 +48,10 @@ def run_detection(event_data: dict, db: Session) -> Threat:
         threat_type=threat_type,
         severity=severity,
         confidence=result["confidence"],
-        detection_method="IsolationForest+XGBoost",
+        ai_score=result["anomaly_score"],
+        physics_score=physics_res["physics_anomaly_score"],
+        signal_integrity=json.dumps(physics_res),
+        detection_method="Hybrid AI + PHY-Layer Signal Analysis",
         shap_values=json.dumps(shap_vals),
         status=ThreatStatus.open,
     )

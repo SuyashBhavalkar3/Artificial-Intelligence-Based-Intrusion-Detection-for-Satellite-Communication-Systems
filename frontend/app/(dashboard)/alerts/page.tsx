@@ -2,6 +2,20 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { AlertOut } from "@/lib/types";
+import { formatToIST } from "@/lib/utils";
+
+const COLORS = {
+  primary: "#00f2ff",
+  bg: "#0b0e14",
+  bgCard: "#151921",
+  border: "#1e293b",
+  text: "#f8fafc",
+  muted: "#94a3b8",
+  low: "#10b981",
+  medium: "#facc15",
+  high: "#f59e0b",
+  critical: "#ff003c",
+};
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<AlertOut[]>([]);
@@ -30,67 +44,81 @@ export default function AlertsPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-lg font-semibold">Alerts</h1>
-        <label className="flex items-center gap-2 text-sm">
+    <div style={{ padding: 24, minHeight: "100vh", background: COLORS.bg }}>
+      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40, borderBottom: `1px solid ${COLORS.border}`, paddingBottom: 24 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: COLORS.text, letterSpacing: "-0.02em" }}>ALERT_DISPATCH_LOG</h1>
+        <label style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
           <input
             type="checkbox"
             checked={showUnacked}
             onChange={(e) => setShowUnacked(e.target.checked)}
+            style={{ 
+              accentColor: COLORS.primary, width: 16, height: 16, 
+              background: COLORS.bgCard, border: `1px solid ${COLORS.border}` 
+            }}
           />
-          Unacknowledged only
+          <span style={{ fontSize: 10, fontWeight: 900, color: COLORS.primary, letterSpacing: "0.1em" }}>UNACKNOWLEDGED_ONLY</span>
         </label>
-      </div>
+      </header>
 
-      {error && <div className="text-sm text-red-400 mb-4">{error}</div>}
+      {error && <div style={{ color: COLORS.critical, fontSize: 12, marginBottom: 16 }}>ERROR_LOG: {error}</div>}
+      
       {loading ? (
-        <div className="text-sm text-neutral-500">Loading_Telemetry...</div>
+        <div style={{ color: COLORS.muted, fontSize: 12, fontFamily: "monospace" }}>SYNCHRONIZING_ALERT_STREAM...</div>
       ) : (
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
-          <table className="w-full text-sm">
-            <thead style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border)" }}>
-              <tr>
-                {["ID", "Threat", "Channel", "Message", "Sent At", "Status", "Action"].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-bold text-neutral-500 uppercase tracking-wider">{h}</th>
+        <div style={{ background: COLORS.bgCard, border: `1px solid ${COLORS.border}`, borderRadius: 4, overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+            <thead>
+              <tr style={{ background: "rgba(0,0,0,0.2)", borderBottom: `1px solid ${COLORS.border}` }}>
+                {["ID", "Threat ID", "Channel", "Message", "Sent At", "Status", "Action"].map((h) => (
+                  <th key={h} style={{ 
+                    textAlign: "left", padding: "16px 24px", fontSize: 10, 
+                    fontWeight: 900, color: COLORS.muted, textTransform: "uppercase", letterSpacing: "0.1em" 
+                  }}>{h.replace(" ", "_")}</th>
                 ))}
               </tr>
             </thead>
-            <tbody style={{ color: "var(--text)" }}>
+            <tbody>
               {alerts.map((a) => (
-                <tr key={a.id} style={{ borderBottom: "1px solid var(--border)" }} className="hover:bg-white/5">
-                  <td className="px-4 py-3 font-mono">{a.id}</td>
-                  <td className="px-4 py-3 font-mono text-cyan-400">{a.threat_id}</td>
-                  <td className="px-4 py-3 uppercase text-xs font-bold text-neutral-400">{a.channel}</td>
-                  <td className="px-4 py-3 max-w-xs truncate">{a.message}</td>
-                  <td className="px-4 py-3 text-neutral-500 font-mono text-xs">{new Date(a.sent_at).toLocaleString()}</td>
-                  <td className="px-4 py-3">
+                <tr key={a.id} style={{ borderBottom: `1px solid ${COLORS.border}40`, transition: "background 0.2s" }} className="hover:bg-white/5">
+                  <td style={{ padding: "16px 24px", color: COLORS.text, fontWeight: 900, fontFamily: "monospace", fontSize: 13 }}>{a.id.toString().padStart(3, "0")}</td>
+                  <td style={{ padding: "16px 24px", color: COLORS.primary, fontWeight: 900, fontFamily: "monospace", fontSize: 13 }}>0X{a.threat_id.toString(16).toUpperCase()}</td>
+                  <td style={{ padding: "16px 24px", color: COLORS.text, fontSize: 11, fontWeight: 900, textTransform: "uppercase" }}>{a.channel}</td>
+                  <td style={{ padding: "16px 24px", color: COLORS.text, fontSize: 12, fontWeight: 600, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.message}</td>
+                  <td style={{ padding: "16px 24px", color: COLORS.muted, fontFamily: "monospace", fontSize: 11 }}>{formatToIST(a.sent_at)}</td>
+                  <td style={{ padding: "16px 24px" }}>
                     <span style={{ 
-                      fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
-                      background: a.acknowledged ? "var(--bg)" : "rgba(245, 158, 11, 0.1)",
-                      color: a.acknowledged ? "var(--text-muted)" : "#f59e0b"
+                      fontSize: 9, fontWeight: 900, padding: "4px 10px", borderRadius: 2,
+                      background: a.acknowledged ? "rgba(0,0,0,0.3)" : `${COLORS.high}15`,
+                      color: a.acknowledged ? COLORS.muted : COLORS.high,
+                      border: `1px solid ${a.acknowledged ? COLORS.border : `${COLORS.high}40`}`
                     }}>
                       {a.acknowledged ? "ACKNOWLEDGED" : "PENDING_ACTION"}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: "16px 24px" }}>
                     {!a.acknowledged && (
                       <button
                         onClick={() => acknowledge(a.id)}
                         style={{
-                          fontSize: 10, fontWeight: 700, padding: "4px 10px",
-                          border: "1px solid var(--border-strong)", borderRadius: 4,
-                          background: "none", color: "var(--cyan)", cursor: "pointer"
+                          fontSize: 9, fontWeight: 900, padding: "6px 12px",
+                          border: `1px solid ${COLORS.primary}`, borderRadius: 2,
+                          background: "none", color: COLORS.primary, cursor: "pointer",
+                          letterSpacing: "0.05em"
                         }}
                       >
-                        ACKNOWLEDGE
+                        RESOLVE_ALERT
                       </button>
                     )}
                   </td>
                 </tr>
               ))}
               {alerts.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-6 text-center text-neutral-400">No alerts</td></tr>
+                <tr>
+                  <td colSpan={7} style={{ padding: 64, textAlign: "center", color: COLORS.muted, fontSize: 12, fontStyle: "italic", letterSpacing: "0.1em" }}>
+                    NO_ALERTS_FOUND_IN_DISPATCH_LOG
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

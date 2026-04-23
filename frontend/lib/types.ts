@@ -37,6 +37,9 @@ export interface ThreatOut {
   explanation?: string;
   shap_values?: string;
   status: string;
+  ai_score?: number;
+  physics_score?: number;
+  signal_integrity?: string;
   detected_at: string;
   blockchain_tx_hash?: string;
   blockchain_block_number?: number;

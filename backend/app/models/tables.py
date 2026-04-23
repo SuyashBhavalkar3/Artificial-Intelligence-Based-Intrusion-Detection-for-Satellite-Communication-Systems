@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import (
     Column, Integer, String, Float, Boolean, Text,
     DateTime, ForeignKey, Enum as SAEnum
@@ -36,12 +36,12 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(String, default="analyst")  # admin / analyst
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class NetworkEvent(Base):
     __tablename__ = "network_events"
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     src_ip = Column(String)
     dst_ip = Column(String)
     protocol = Column(String)
@@ -50,7 +50,7 @@ class NetworkEvent(Base):
     signal_strength = Column(Float)
     anomaly_score = Column(Float, nullable=True)
     raw_features = Column(Text, nullable=True)  # JSON string
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Threat(Base):
     __tablename__ = "threats"
@@ -63,7 +63,10 @@ class Threat(Base):
     explanation = Column(Text, nullable=True)
     shap_values = Column(Text, nullable=True)  # JSON string
     status = Column(SAEnum(ThreatStatus), default=ThreatStatus.open)
-    detected_at = Column(DateTime, default=datetime.utcnow)
+    ai_score = Column(Float, nullable=True)
+    physics_score = Column(Float, nullable=True)
+    signal_integrity = Column(Text, nullable=True) # JSON string
+    detected_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     blockchain_tx_hash = Column(String, nullable=True)
     blockchain_block_number = Column(Integer, nullable=True)
 
@@ -73,7 +76,7 @@ class Alert(Base):
     threat_id = Column(Integer, ForeignKey("threats.id"))
     channel = Column(SAEnum(AlertChannel), nullable=False)
     message = Column(Text)
-    sent_at = Column(DateTime, default=datetime.utcnow)
+    sent_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     acknowledged = Column(Boolean, default=False)
     acknowledged_at = Column(DateTime, nullable=True)
 
@@ -83,7 +86,7 @@ class AuditLog(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     action = Column(String)
     resource = Column(String)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     ip_address = Column(String, nullable=True)
 
 class Satellite(Base):
@@ -93,5 +96,5 @@ class Satellite(Base):
     norad_id = Column(String, unique=True)
     status = Column(String, default="active")  # active / maintenance / decommissioned
     encryption_key_status = Column(String, default="rotated")
-    last_contact = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    last_contact = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

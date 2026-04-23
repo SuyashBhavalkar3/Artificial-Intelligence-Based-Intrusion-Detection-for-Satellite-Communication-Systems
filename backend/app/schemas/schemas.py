@@ -52,6 +52,9 @@ class ThreatOut(BaseModel):
     explanation: Optional[str]
     shap_values: Optional[str]
     status: str
+    ai_score: Optional[float] = None
+    physics_score: Optional[float] = None
+    signal_integrity: Optional[str] = None
     detected_at: datetime
     blockchain_tx_hash: Optional[str] = None
     blockchain_block_number: Optional[int] = None
