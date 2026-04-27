@@ -25,3 +25,6 @@ httpx
 pytest
 pytest-asyncio
 pycryptodome
+matplotlib
+seaborn
+plotly
