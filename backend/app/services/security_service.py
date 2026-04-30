@@ -8,6 +8,7 @@ from Crypto.PublicKey import ECC
 from Crypto.Signature import eddsa
 from Crypto.Hash import SHA256
 from typing import Tuple, Dict, Any
+from kyber_py.kyber import Kyber512
 
 class SecurityService:
     """
@@ -15,14 +16,14 @@ class SecurityService:
     - AES-256-GCM (Symmetric Encryption)
     - ECC Ed25519 (Digital Signatures)
     - SHA-256 (Hashing)
-    - Quantum-Resistant Hybrid Architecture (Placeholder)
+    - CRYSTALS-Kyber (Post-Quantum Key Encapsulation)
     """
     
     def __init__(self):
-        # In a real app, these would be loaded from a secure vault or env
-        self.aes_key = sha256(os.getenv("SECRET_KEY", "changeme").encode()).digest()
+        # Base keys
+        self.base_secret = os.getenv("SECRET_KEY", "changeme")
         
-        # ECC Key Management
+        # ECC Key Management (Standard Signature Layer)
         self.ecc_key_path = "ecc_private.pem"
         if os.path.exists(self.ecc_key_path):
             with open(self.ecc_key_path, "rt") as f:
@@ -34,12 +35,36 @@ class SecurityService:
         
         self.public_key = self.private_key.public_key()
 
+        # Kyber PQC Key Management (Post-Quantum Layer)
+        self.kyber_pub_path = "kyber_public.bin"
+        self.kyber_priv_path = "kyber_private.bin"
+        
+        if os.path.exists(self.kyber_pub_path) and os.path.exists(self.kyber_priv_path):
+            with open(self.kyber_pub_path, "rb") as f:
+                self.kyber_pk = f.read()
+            with open(self.kyber_priv_path, "rb") as f:
+                self.kyber_sk = f.read()
+        else:
+            # Generate new Kyber-512 Keypair
+            self.kyber_pk, self.kyber_sk = Kyber512.keygen()
+            with open(self.kyber_pub_path, "wb") as f:
+                f.write(self.kyber_pk)
+            with open(self.kyber_priv_path, "wb") as f:
+                f.write(self.kyber_sk)
+
     def encrypt_payload(self, data: Dict[str, Any]) -> str:
         """
-        Encrypts data using AES-256-GCM.
-        Returns a base64 encoded string containing nonce, tag, and ciphertext.
+        Encrypts data using Hybrid Kyber-AES-256-GCM.
         """
-        cipher = AES.new(self.aes_key, AES.MODE_GCM)
+        # 1. Kyber Encapsulation (Generates a shared secret and ciphertext)
+        # In a real hybrid system, the sender uses the receiver's public key.
+        kyber_ciphertext, shared_secret = Kyber512.encaps(self.kyber_pk)
+        
+        # 2. Derive AES Key from shared secret
+        aes_key = sha256(shared_secret).digest()
+        
+        # 3. Encrypt data with AES-GCM
+        cipher = AES.new(aes_key, AES.MODE_GCM)
         json_data = json.dumps(data).encode()
         ciphertext, tag = cipher.encrypt_and_digest(json_data)
         
@@ -48,26 +73,34 @@ class SecurityService:
             "nonce": base64.b64encode(cipher.nonce).decode(),
             "ciphertext": base64.b64encode(ciphertext).decode(),
             "tag": base64.b64encode(tag).decode(),
-            "pqc_wrapped": "SIMULATED_KYBER_ENVELOPE", # Placeholder for PQC
-            "algorithm": "AES-256-GCM + Ed25519 + Hybrid PQC"
+            "pqc_wrapped": base64.b64encode(kyber_ciphertext).decode(),
+            "algorithm": "CRYSTALS-Kyber + AES-256-GCM"
         }
         return base64.b64encode(json.dumps(encrypted_bundle).encode()).decode()
 
     def decrypt_payload(self, encrypted_str: str) -> Dict[str, Any]:
         """
-        Decrypts data using AES-256-GCM.
+        Decrypts data using Hybrid Kyber-AES-256-GCM.
         """
         try:
             bundle = json.loads(base64.b64decode(encrypted_str).decode())
             nonce = base64.b64decode(bundle["nonce"])
             ciphertext = base64.b64decode(bundle["ciphertext"])
             tag = base64.b64decode(bundle["tag"])
+            kyber_ciphertext = base64.b64decode(bundle["pqc_wrapped"])
             
-            cipher = AES.new(self.aes_key, AES.MODE_GCM, nonce=nonce)
+            # 1. Kyber Decapsulation (Recover shared secret)
+            shared_secret = Kyber512.decaps(kyber_ciphertext, self.kyber_sk)
+            
+            # 2. Derive AES Key
+            aes_key = sha256(shared_secret).digest()
+            
+            # 3. Decrypt and verify
+            cipher = AES.new(aes_key, AES.MODE_GCM, nonce=nonce)
             plaintext = cipher.decrypt_and_verify(ciphertext, tag)
             return json.loads(plaintext.decode())
         except Exception as e:
-            raise ValueError(f"Decryption failed: {str(e)}")
+            raise ValueError(f"Decryption failed (PQC Layer Error): {str(e)}")
 
     def sign_command(self, command: str) -> str:
         """

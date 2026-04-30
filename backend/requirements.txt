@@ -28,3 +28,4 @@ pycryptodome
 matplotlib
 seaborn
 plotly
+kyber-py
